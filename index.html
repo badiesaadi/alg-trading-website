@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Shop family, adult, and infant hygiene products at Alg Trading.">
+    <title>Alg Trading</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Lato:wght@300;400;700&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <h1 class="logo">Alg Trading</h1>
+            <nav class="nav">
+                <span class="product-count">Loading products...</span>
+                <a href="https://www.ebay.co.uk/str/yourstore" class="btn btn-primary" target="_blank">Visit Our eBay Store</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="hero-image">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h2 class="hero-title">Discover Quality Hygiene Products</h2>
+                    <p class="hero-subtitle">Shop our range for family, adult, and infant needs.</p>
+                </div>
+            </section>
+
+            <section class="product-intro">
+                <h2 class="product-intro-title">Our Hygiene Essentials</h2>
+                <h3 class="product-intro-subtitle">Your Trusted Source for Quality Products</h3>
+                <p class="product-intro-text">At Alg Trading, we provide a comprehensive range of premium hygiene solutions, available year-round. From everyday essentials like tissues, paper towels, and toilet paper to specialized products such as baby diapers, feminine care, and incontinence solutions, our offerings cater to all your needs. Every product is FSC-certified and rigorously tested by Dermatest (Germany) and Eurofins (France) for superior quality and safety.</p>
+            </section>
+
+            <section id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Loading products...</p>
+            </section>
+
+            <section id="error" class="error hidden">
+                <span class="error-icon">⚠️</span>
+                <h2>No products found</h2>
+                <p>We're currently updating our product catalog. Please check back soon!</p>
+            </section>
+
+            <section id="product-grid" class="product-grid"></section>
+
+            <div id="product-detail" class="modal hidden">
+                <div class="modal-content">
+                    <button class="modal-close">×</button>
+                    <div id="product-detail-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <section class="category-section">
+            <div class="container">
+                <div class="category-item">
+                    <span class="category-icon">👨‍👩‍👧</span>
+                    <h3>Family Hygiene</h3>
+                    <p>A wide range of paper towels: paper towels, toilet paper, napkins, and tissues. Practical and suitable for all uses, whether at home or outdoors.</p>
+                </div>
+                <div class="category-item">
+                    <span class="category-icon">🛒</span>
+                    <h3>Adult Hygiene</h3>
+                    <p>Caring for your loved ones is essential. That's why the Uni-form brand was created to improve their daily lives while addressing incontinence-related needs.</p>
+                </div>
+                <div class="category-item">
+                    <span class="category-icon">👶</span>
+                    <h3>Infant Hygiene</h3>
+                    <p>Quality above all: our range supports babies from birth to toilet training, meeting their protection needs at every stage.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-contact">
+                    <h2 class="footer-title">Contact Us</h2>
+                    <div class="footer-contact-item">
+                        <span class="footer-icon">📞</span>
+                        <a href="tel:+4402036093344" class="footer-link">Call Free: +44 020 3609 3344</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-icon">✉️</span>
+                        <a href="mailto:info@atlasfreightconnect.co.uk" class="footer-link">info@atlasfreightconnect.co.uk</a>
+                    </div>
+                </div>
+                <div class="footer-description">
+                    <h2 class="footer-title">About Our Products</h2>
+                    <p class="footer-text">At Alg Trading, we offer a wide selection of high-quality hygiene products, available throughout the year. Our range includes daily necessities such as toilet tissue, paper towels, and facial tissues, along with specialized items like baby diapers, feminine hygiene products, and incontinence care solutions. All our products are FSC-certified and have undergone strict testing by Dermatest in Germany and Eurofins in France to ensure exceptional quality and safety.</p>
+                </div>
+            </div>
+            <p class="footer-copyright">© 2025 Alg Trading. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

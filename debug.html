@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Supabase Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #10B981; }
+        .error { color: #EF4444; }
+        .warning { color: #F59E0B; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h2>1. Environment Variables</h2>
+        <div id="env-check"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>2. Database Connection</h2>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>3. Products Table</h2>
+        <button onclick="checkProducts()">Check Products</button>
+        <button onclick="insertTestProduct()">Insert Test Product</button>
+        <div id="products-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>4. Authentication</h2>
+        <button onclick="testAuth()">Test Auth</button>
+        <button onclick="createTestUser()">Create Test User</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>5. RLS Policies</h2>
+        <button onclick="checkPolicies()">Check RLS Policies</button>
+        <div id="policies-result"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script>
+    <script>
+        // Supabase configuration
+        const supabaseUrl = 'https://rbdjierclsiuvprvrzie.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiZGppZXJjbHNpdXZwcnZyemllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjgwNjUsImV4cCI6MjA2NzMwNDA2NX0.E69edaH7d8w_bJq4iQlK7fQGvSaEOxgjdTqBE964O1Y';
+        
+        // Create Supabase client
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        // Make supabase available globally for debugging
+        window.supabase = supabase;
+        
+        // Check environment variables
+        function checkEnvVars() {
+            const envDiv = document.getElementById('env-check');
+            
+            let html = '';
+            if (supabaseUrl) {
+                html += `<p class="success">✓ SUPABASE_URL: ${supabaseUrl}</p>`;
+            } else {
+                html += `<p class="error">✗ SUPABASE_URL: Missing</p>`;
+            }
+            
+            if (supabaseAnonKey) {
+                html += `<p class="success">✓ SUPABASE_ANON_KEY: ${supabaseAnonKey.substring(0, 20)}...</p>`;
+            } else {
+                html += `<p class="error">✗ SUPABASE_ANON_KEY: Missing</p>`;
+            }
+            
+            envDiv.innerHTML = html;
+        }
+        
+        // Test basic connection
+        window.testConnection = async function() {
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = '<p>Testing connection...</p>';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Connection failed: ${error.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="success">✓ Connection successful! Found ${data} products</p>`;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Connection error: ${err.message}</p>`;
+            }
+        };
+        
+        // Check products
+        window.checkProducts = async function() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.innerHTML = '<p>Checking products...</p>';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .limit(5);
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="success">✓ Found ${data.length} products</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+            }
+        };
+        
+        // Insert test product
+        window.insertTestProduct = async function() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.innerHTML = '<p>Inserting test product...</p>';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('products')
+                    .insert([{
+                        name: 'Debug Test Product',
+                        description: 'This is a test product created by the debug tool',
+                        price: 9.99,
+                        stock: 1,
+                        image_url: 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg'
+                    }])
+                    .select();
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Insert failed: ${error.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="success">✓ Test product inserted successfully!</p>`;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Insert error: ${err.message}</p>`;
+            }
+        };
+        
+        // Test authentication
+        window.testAuth = async function() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.innerHTML = '<p>Testing authentication...</p>';
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Auth error: ${error.message}</p>`;
+                } else if (session) {
+                    resultDiv.innerHTML = `<p class="success">✓ User logged in: ${session.user.email}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="warning">No user logged in</p>`;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Auth error: ${err.message}</p>`;
+            }
+        };
+        
+        // Create test user
+        window.createTestUser = async function() {
+            const resultDiv = document.getElementById('auth-result');
+            const email = prompt('Enter email for test user:');
+            const password = prompt('Enter password (min 6 characters):');
+            
+            if (!email || !password) {
+                resultDiv.innerHTML = '<p class="error">Email and password required</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Creating test user...</p>';
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p class="error">Signup failed: ${error.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="success">✓ User created successfully!</p>
+                        <p>Email: ${data.user.email}</p>
+                        <p>Check your email for confirmation (if email confirmation is enabled)</p>
+                    `;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Signup error: ${err.message}</p>`;
+            }
+        };
+        
+        // Check RLS policies
+        window.checkPolicies = async function() {
+            const resultDiv = document.getElementById('policies-result');
+            resultDiv.innerHTML = '<p>Checking RLS policies...</p>';
+            
+            try {
+                // Try to read as anonymous user
+                const { data: readData, error: readError } = await supabase
+                    .from('products')
+                    .select('id, name')
+                    .limit(1);
+                
+                let html = '';
+                if (readError) {
+                    html += `<p class="error">✗ Public read access failed: ${readError.message}</p>`;
+                } else {
+                    html += `<p class="success">✓ Public read access working</p>`;
+                }
+                
+                // Try to insert as anonymous user (should fail)
+                const { error: insertError } = await supabase
+                    .from('products')
+                    .insert([{
+                        name: 'Test',
+                        description: 'Test',
+                        price: 1,
+                        stock: 1
+                    }]);
+                
+                if (insertError) {
+                    html += `<p class="success">✓ Anonymous insert properly blocked: ${insertError.message}</p>`;
+                } else {
+                    html += `<p class="warning">⚠ Anonymous insert allowed (this might be a security issue)</p>`;
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (err) {
+                resultDiv.innerHTML = `<p class="error">Policy check error: ${err.message}</p>`;
+            }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkEnvVars();
+        });
+    </script>
+</body>
+</html>

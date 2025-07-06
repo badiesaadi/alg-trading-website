@@ -146,7 +146,7 @@ body {
 /* Hero Image Section */
 .hero-image {
     position: relative;
-    background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c');
+    background-image: url(/pictures/house.jpeg);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -932,3 +932,4 @@ body {
         background: var(--teal-700);
     }
 }
+

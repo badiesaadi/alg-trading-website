@@ -1,4 +1,3 @@
-// Supabase configuration
 const supabaseUrl = 'https://rbdjierclsiuvprvrzie.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiZGppZXJjbHNpdXZwcnZyemllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjgwNjUsImV4cCI6MjA2NzMwNDA2NX0.E69edaH7d8w_bJq4iQlK7fQGvSaEOxgjdTqBE964O1Y';
 
@@ -29,7 +28,7 @@ async function getProductStats() {
     try {
         const { data: allProducts, error: allError } = await supabase
             .from('products')
-            .select('stock');
+            .select('id');
 
         if (allError) {
             console.error('Error fetching product stats:', allError);
@@ -37,13 +36,9 @@ async function getProductStats() {
         }
 
         const total = allProducts.length;
-        const available = allProducts.filter(p => p.stock > 0).length;
-        const outOfStock = allProducts.filter(p => p.stock === 0).length;
 
         return {
-            total,
-            available,
-            out_of_stock: outOfStock
+            total
         };
     } catch (error) {
         console.error('Error in getProductStats:', error);
@@ -113,18 +108,15 @@ async function deleteProduct(id) {
 
 async function uploadImage(file) {
     try {
-        // Validate file type
         const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
         if (!validTypes.includes(file.type)) {
             throw new Error('Only JPEG, PNG, and GIF images are allowed.');
         }
 
-        // Generate a unique file name
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
         const filePath = `products/${fileName}`;
 
-        // Check authentication state
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
             console.error('Session check error:', sessionError);
@@ -134,7 +126,6 @@ async function uploadImage(file) {
             throw new Error('User is not authenticated. Please log in again.');
         }
 
-        // Upload file to Supabase Storage
         const { error: uploadError } = await supabase.storage
             .from('product-images')
             .upload(filePath, file);
@@ -147,7 +138,6 @@ async function uploadImage(file) {
             throw new Error(`Failed to upload image: ${uploadError.message}`);
         }
 
-        // Get the public URL
         const { data: { publicUrl } } = supabase.storage
             .from('product-images')
             .getPublicUrl(filePath);
@@ -163,12 +153,72 @@ async function uploadImage(file) {
     }
 }
 
+async function getAllMessages() {
+    try {
+        const { data, error } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('archived', false)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching messages:', error);
+            throw new Error(`Failed to fetch messages: ${error.message}`);
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error in getAllMessages:', error);
+        throw error;
+    }
+}
+
+async function deleteMessage(id) {
+    try {
+        const { error } = await supabase
+            .from('contacts')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting message:', error);
+            throw new Error(`Failed to delete message: ${error.message}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error in deleteMessage:', error);
+        throw error;
+    }
+}
+
+async function archiveMessage(id) {
+    try {
+        const { error } = await supabase
+            .from('contacts')
+            .update({ archived: true })
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error archiving message:', error);
+            throw new Error(`Failed to archive message: ${error.message}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error in archiveMessage:', error);
+        throw error;
+    }
+}
+
 class AdminApp {
     constructor() {
         this.currentUser = null;
         this.products = [];
+        this.messages = [];
         this.editingProduct = null;
         this.deletingProductId = null;
+        this.deletingMessageId = null;
         
         this.init();
     }
@@ -179,34 +229,28 @@ class AdminApp {
     }
 
     bindEvents() {
-        // Login form
         document.getElementById('login-form').addEventListener('submit', (e) => {
             this.handleLogin(e);
         });
 
-        // Logout button
         document.getElementById('logout-btn').addEventListener('click', () => {
             this.handleLogout();
         });
 
-        // Add product button
         document.getElementById('add-product-btn').addEventListener('click', () => {
             this.showAddProductModal();
         });
 
-        // Product form
         document.getElementById('product-form').addEventListener('submit', (e) => {
             this.handleProductSubmit(e);
         });
 
-        // Modal close buttons
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.closeModal(e.target.closest('.modal'));
             });
         });
 
-        // Cancel buttons
         document.getElementById('cancel-btn').addEventListener('click', () => {
             this.closeModal(document.getElementById('product-modal'));
         });
@@ -215,12 +259,10 @@ class AdminApp {
             this.closeModal(document.getElementById('delete-modal'));
         });
 
-        // Confirm delete button
         document.getElementById('confirm-delete-btn').addEventListener('click', () => {
             this.confirmDelete();
         });
 
-        // Image preview
         document.getElementById('product-image').addEventListener('change', (e) => {
             const file = e.target.files[0];
             const preview = document.getElementById('image-preview');
@@ -237,7 +279,6 @@ class AdminApp {
             }
         });
 
-        // Click outside modal to close
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -246,7 +287,6 @@ class AdminApp {
             });
         });
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const openModal = document.querySelector('.modal.show');
@@ -296,7 +336,6 @@ class AdminApp {
         const errorElement = document.getElementById('login-error');
         errorElement.classList.add('hidden');
         
-        // Basic input validation
         if (!email || !password) {
             errorElement.textContent = 'Email and password are required.';
             errorElement.classList.remove('hidden');
@@ -346,7 +385,6 @@ class AdminApp {
         document.getElementById('login-section').classList.remove('hidden');
         document.getElementById('admin-section').classList.add('hidden');
         
-        // Clear form
         document.getElementById('login-form').reset();
         document.getElementById('login-error').classList.add('hidden');
     }
@@ -358,40 +396,49 @@ class AdminApp {
 
     async loadDashboardData() {
         this.showLoading();
+        this.showMessagesLoading();
         
         try {
-            // Load stats and products in parallel
-            const [stats, products] = await Promise.all([
+            const [stats, products, messages] = await Promise.all([
                 getProductStats(),
-                getAllProducts()
+                getAllProducts(),
+                getAllMessages()
             ]);
             
             this.updateStats(stats);
             this.products = products;
+            this.messages = messages;
             this.renderProductsTable();
+            this.renderMessagesTable();
             
         } catch (error) {
             console.error('Error loading dashboard data:', error);
-            let errorMessage = error.message || 'Error loading products. Please try again.';
+            let errorMessage = error.message || 'Error loading data. Please try again.';
             if (error.message.includes('Failed to fetch')) {
                 errorMessage = 'Unable to connect to the server. Please check your internet connection or Supabase URL.';
             }
             document.getElementById('products-tbody').innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center" style="padding: 2rem;">
+                    <td colspan="4" class="text-center" style="padding: 2rem;">
+                        ${errorMessage}
+                    </td>
+                </tr>
+            `;
+            document.getElementById('messages-tbody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center" style="padding: 2rem;">
                         ${errorMessage}
                     </td>
                 </tr>
             `;
         } finally {
             this.hideLoading();
+            this.hideMessagesLoading();
         }
     }
 
     updateStats(stats) {
         document.getElementById('total-products').textContent = stats.total;
-        document.getElementById('available-products').textContent = stats.available;
-        document.getElementById('out-of-stock').textContent = stats.out_of_stock;
     }
 
     renderProductsTable() {
@@ -401,7 +448,7 @@ class AdminApp {
         if (this.products.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center" style="padding: 2rem;">
+                    <td colspan="4" class="text-center" style="padding: 2rem;">
                         No products found. Add your first product to get started.
                     </td>
                 </tr>
@@ -418,8 +465,6 @@ class AdminApp {
     createProductRow(product) {
         const row = document.createElement('tr');
         
-        const stockClass = product.stock === 0 ? 'out' : product.stock < 5 ? 'low' : '';
-        const stockText = product.stock === 0 ? 'Out of Stock' : `${product.stock} in stock`;
         const imageUrl = product.image_url || this.getPlaceholderImage();
         
         row.innerHTML = `
@@ -430,12 +475,6 @@ class AdminApp {
             </td>
             <td class="product-name-cell">${this.escapeHtml(product.name)}</td>
             <td class="product-price-cell">£${parseFloat(product.price).toFixed(2)}</td>
-            <td>
-                <div class="stock-cell">
-                    <span class="stock-indicator ${stockClass}"></span>
-                    <span>${stockText}</span>
-                </div>
-            </td>
             <td class="actions-cell">
                 <button class="btn btn-small btn-secondary edit-btn" data-id="${product.id}">
                     Edit
@@ -446,13 +485,71 @@ class AdminApp {
             </td>
         `;
         
-        // Add event listeners
         row.querySelector('.edit-btn').addEventListener('click', () => {
             this.showEditProductModal(product);
         });
         
         row.querySelector('.delete-btn').addEventListener('click', () => {
-            this.showDeleteModal(product.id);
+            this.showDeleteModal(product.id, 'product');
+        });
+        
+        return row;
+    }
+
+    renderMessagesTable() {
+        const tbody = document.getElementById('messages-tbody');
+        tbody.innerHTML = '';
+        
+        if (this.messages.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center" style="padding: 2rem;">
+                        No messages found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        this.messages.forEach(message => {
+            const row = this.createMessageRow(message);
+            tbody.appendChild(row);
+        });
+    }
+
+    createMessageRow(message) {
+        const row = document.createElement('tr');
+        
+        const formattedDate = new Date(message.created_at).toLocaleString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        row.innerHTML = `
+            <td class="product-name-cell">${this.escapeHtml(message.name)}</td>
+            <td>${this.escapeHtml(message.email)}</td>
+            <td>${this.escapeHtml(message.phone_number)}</td>
+            <td>${this.escapeHtml(message.message)}</td>
+            <td>${formattedDate}</td>
+            <td class="actions-cell">
+                <button class="btn btn-small btn-secondary archive-btn" data-id="${message.id}">
+                    Archive
+                </button>
+                <button class="btn btn-small btn-danger delete-btn" data-id="${message.id}">
+                    Delete
+                </button>
+            </td>
+        `;
+        
+        row.querySelector('.archive-btn').addEventListener('click', () => {
+            this.archiveMessage(message.id);
+        });
+        
+        row.querySelector('.delete-btn').addEventListener('click', () => {
+            this.showDeleteModal(message.id, 'message');
         });
         
         return row;
@@ -473,11 +570,9 @@ class AdminApp {
         document.getElementById('modal-title').textContent = 'Edit Product';
         document.getElementById('save-btn').textContent = 'Update Product';
         
-        // Populate form
         document.getElementById('product-name').value = product.name || '';
         document.getElementById('product-description').value = product.description || '';
         document.getElementById('product-price').value = product.price || 0;
-        document.getElementById('product-stock').value = product.stock || 0;
         document.getElementById('product-image').value = '';
         document.getElementById('image-preview').innerHTML = product.image_url 
             ? `<img src="${product.image_url}" alt="Current product image">`
@@ -497,10 +592,8 @@ class AdminApp {
         const name = formData.get('name').trim();
         const description = formData.get('description').trim();
         const price = parseFloat(formData.get('price'));
-        const stock = parseInt(formData.get('stock'));
         const imageFile = formData.get('image');
         
-        // Validate form inputs
         if (!name) {
             errorElement.textContent = 'Product name is required.';
             errorElement.classList.remove('hidden');
@@ -516,21 +609,14 @@ class AdminApp {
             errorElement.classList.remove('hidden');
             return;
         }
-        if (isNaN(stock) || stock < 0) {
-            errorElement.textContent = 'Stock must be a valid number greater than or equal to 0.';
-            errorElement.classList.remove('hidden');
-            return;
-        }
         
         const productData = {
             name,
             description,
             price,
-            stock,
             image_url: this.editingProduct ? this.editingProduct.image_url : null
         };
         
-        // Check authentication
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
             console.error('Session check error:', sessionError);
@@ -546,7 +632,6 @@ class AdminApp {
             return;
         }
         
-        // Handle image upload (optional)
         if (imageFile && imageFile.size > 0) {
             if (imageFile.size > 5 * 1024 * 1024) {
                 errorElement.textContent = 'Image size must be less than 5MB.';
@@ -584,23 +669,49 @@ class AdminApp {
         }
     }
 
-    showDeleteModal(productId) {
-        this.deletingProductId = productId;
-        this.showModal(document.getElementById('delete-modal'));
+    showDeleteModal(id, type) {
+        this.deletingProductId = type === 'product' ? id : null;
+        this.deletingMessageId = type === 'message' ? id : null;
+        const modal = document.getElementById('delete-modal');
+        const title = document.getElementById('modal-title');
+        const message = modal.querySelector('p');
+        title.textContent = type === 'product' ? 'Confirm Delete Product' : 'Confirm Delete Message';
+        message.textContent = type === 'product' 
+            ? 'Are you sure you want to delete this product? This action cannot be undone.'
+            : 'Are you sure you want to delete this message? This action cannot be undone.';
+        this.showModal(modal);
     }
 
     async confirmDelete() {
-        if (!this.deletingProductId) return;
-        
+        const modal = document.getElementById('delete-modal');
         try {
-            await deleteProduct(this.deletingProductId);
-            this.closeModal(document.getElementById('delete-modal'));
+            if (this.deletingProductId) {
+                await deleteProduct(this.deletingProductId);
+            } else if (this.deletingMessageId) {
+                await deleteMessage(this.deletingMessageId);
+            }
+            this.closeModal(modal);
             await this.loadDashboardData();
             this.deletingProductId = null;
-            
+            this.deletingMessageId = null;
         } catch (error) {
-            console.error('Error deleting product:', error);
-            let errorMessage = error.message || 'Error deleting product. Please try again.';
+            console.error('Error deleting:', error);
+            let errorMessage = error.message || 'Error deleting item. Please try again.';
+            if (error.message.includes('Failed to fetch')) {
+                errorMessage = 'Unable to connect to the server. Please check your internet connection or Supabase URL.';
+            }
+            document.getElementById('product-error').textContent = errorMessage;
+            document.getElementById('product-error').classList.remove('hidden');
+        }
+    }
+
+    async archiveMessage(id) {
+        try {
+            await archiveMessage(id);
+            await this.loadDashboardData();
+        } catch (error) {
+            console.error('Error archiving message:', error);
+            let errorMessage = error.message || 'Error archiving message. Please try again.';
             if (error.message.includes('Failed to fetch')) {
                 errorMessage = 'Unable to connect to the server. Please check your internet connection or Supabase URL.';
             }
@@ -615,7 +726,6 @@ class AdminApp {
             modal.classList.add('show');
         }, 10);
         
-        // Focus management
         const firstInput = modal.querySelector('input, textarea, button');
         if (firstInput) {
             firstInput.focus();
@@ -639,7 +749,16 @@ class AdminApp {
         document.getElementById('products-table-container').classList.remove('hidden');
     }
 
-    // Utility methods
+    showMessagesLoading() {
+        document.getElementById('messages-loading').classList.remove('hidden');
+        document.getElementById('messages-table-container').classList.add('hidden');
+    }
+
+    hideMessagesLoading() {
+        document.getElementById('messages-loading').classList.add('hidden');
+        document.getElementById('messages-table-container').classList.remove('hidden');
+    }
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -651,10 +770,8 @@ class AdminApp {
     }
 }
 
-// Initialize the admin app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.adminApp = new AdminApp();
 });
 
-// Make adminApp globally available for debugging
 window.adminApp = window.adminApp || {};

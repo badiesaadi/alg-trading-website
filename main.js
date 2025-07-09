@@ -48,32 +48,6 @@ async function getProductById(id) {
     }
 }
 
-async function getProductStats() {
-    try {
-        const { data: allProducts, error: allError } = await supabase
-            .from('products')
-            .select('stock');
-
-        if (allError) {
-            console.error('Error fetching product stats:', allError);
-            throw allError;
-        }
-
-        const total = allProducts.length;
-        const available = allProducts.filter(p => p.stock > 0).length;
-        const outOfStock = allProducts.filter(p => p.stock === 0).length;
-
-        return {
-            total,
-            available,
-            out_of_stock: outOfStock
-        };
-    } catch (error) {
-        console.error('Error in getProductStats:', error);
-        throw error;
-    }
-}
-
 // Main Product App Class
 class ProductApp {
     constructor() {
@@ -130,7 +104,7 @@ class ProductApp {
                 this.showError();
             } else {
                 this.renderProducts();
-                await this.updateProductCount();
+                this.updateProductCount();
             }
         } catch (error) {
             console.error('Error loading products:', error);
@@ -141,15 +115,10 @@ class ProductApp {
         }
     }
 
-    async updateProductCount() {
-        try {
-            const stats = await getProductStats();
-            const countElement = document.querySelector('.product-count');
-            countElement.textContent = `${stats.available} products available`;
-        } catch (error) {
-            console.error('Error updating product count:', error);
-            const countElement = document.querySelector('.product-count');
-            countElement.textContent = 'Products available';
+    updateProductCount() {
+        const countElement = document.querySelector('.product-count');
+        if (countElement) {
+            countElement.textContent = `${this.products.length} products available`;
         }
     }
 
@@ -191,9 +160,6 @@ class ProductApp {
         card.setAttribute('role', 'button');
         card.setAttribute('aria-label', `View details for ${product.name}`);
 
-        const stockClass = product.stock === 0 ? 'out' : product.stock < 5 ? 'low' : '';
-        const stockText = product.stock === 0 ? 'Out of Stock' : `${product.stock} in stock`;
-
         const imageUrl = product.image_url || this.getPlaceholderImage();
 
         card.innerHTML = `
@@ -204,10 +170,6 @@ class ProductApp {
                 <p class="product-description">${this.escapeHtml(product.description)}</p>
                 <div class="product-meta">
                     <span class="product-price">£${parseFloat(product.price).toFixed(2)}</span>
-                    <div class="product-stock">
-                        <span class="stock-indicator ${stockClass}"></span>
-                        <span>${stockText}</span>
-                    </div>
                 </div>
             </div>
         `;
@@ -273,8 +235,6 @@ class ProductApp {
     }
 
     renderProductDetail(product, content) {
-        const stockClass = product.stock === 0 ? 'out' : product.stock < 5 ? 'low' : '';
-        const stockText = product.stock === 0 ? 'Out of Stock' : `${product.stock} in stock`;
         const imageUrl = product.image_url || this.getPlaceholderImage();
 
         content.innerHTML = `
@@ -288,10 +248,6 @@ class ProductApp {
                     <p class="product-detail-description">${this.escapeHtml(product.description)}</p>
                     <div class="product-detail-meta">
                         <div class="product-detail-price">£${parseFloat(product.price).toFixed(2)}</div>
-                        <div class="product-detail-stock">
-                            <span class="stock-indicator ${stockClass}"></span>
-                            <span>${stockText}</span>
-                        </div>
                     </div>
                     <button class="btn btn-secondary back-button" onclick="app.closeModal(document.getElementById('product-detail'))">
                         ← Back to Products

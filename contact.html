@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Alg Trading</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">Alg Trading</a>
+            <nav class="nav">
+                    <a class="product-count" href="index.html" style="text-decoration: none;" >Home</a>
+                <a href="https://www.ebay.com/str/algtrading" class="btn btn-primary">Visit Our eBay Store</a>
+                <a href="about.html" class="btn btn-secondary">About Us</a>
+                <a href="contact.html" class="btn btn-secondary">Contact Us</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="hero-image">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Get in Touch</h1>
+                <p class="hero-subtitle">We're here to assist you with all your hygiene product needs.</p>
+            </div>
+        </section>
+
+        <section class="product-intro">
+            <h2 class="product-intro-title">Contact Alg Trading</h2>
+            <p class="product-intro-text">
+                Have questions about our products or need assistance? Reach out to us via the form below, call us, or connect with us on social media. Our team is dedicated to providing prompt and helpful responses to ensure your satisfaction.
+            </p>
+        </section>
+
+        <section class="category-section">
+            <div class="category-item">
+                <span class="category-icon">📞</span>
+                <h3>Call Us</h3>
+                <p>Reach our customer service team at <a href="tel:+4402036093344" class="footer-link">+44 020 3609 3344</a>. Available Monday to Friday, 9 AM to 5 PM GMT.</p>
+            </div>
+            <div class="category-item">
+                <span class="category-icon">✉️</span>
+                <h3>Email Us</h3>
+                <p>Send your inquiries to <a href="mailto:info@atlasfreightconnect.co.uk" class="footer-link">info@atlasfreightconnect.co.uk</a>. We aim to respond within 24 hours.</p>
+            </div>
+            <div class="category-item">
+                <span class="category-icon">🌐</span>
+                <h3>Follow Us</h3>
+                <p>Stay updated with our latest products and offers on <a href="https://www.twitter.com/AlgTrading" class="footer-link">Twitter</a> and <a href="https://www.instagram.com/AlgTradingOfficial" class="footer-link">Instagram</a>.</p>
+            </div>
+        </section>
+
+        <section class="product-intro">
+            <h2 class="product-intro-title">Send Us a Message</h2>
+            <div class="container">
+                <div class="product-detail">
+                    <div class="product-detail-info">
+                        <form id="contact-form" style="display: flex; flex-direction: column; gap: var(--spacing-4);">
+                            <div>
+                                <label for="name" class="sr-only">Name</label>
+                                <input type="text" id="name" name="name" placeholder="Your Name" required
+                                       style="width: 100%; padding: var(--spacing-3); border: 1px solid var(--gray-300); border-radius: var(--radius-md); font-family: var(--font-family-body); font-size: var(--font-size-base);">
+                            </div>
+                            <div>
+                                <label for="email" class="sr-only">Email</label>
+                                <input type="email" id="email" name="email" placeholder="Your Email" required
+                                       style="width: 100%; padding: var(--spacing-3); border: 1px solid var(--gray-300); border-radius: var(--radius-md); font-family: var(--font-family-body); font-size: var(--font-size-base);">
+                            </div>
+                            <div>
+                                <label for="phone_number" class="sr-only">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number" placeholder="Your Phone Number" required
+                                       style="width: 100%; padding: var(--spacing-3); border: 1px solid var(--gray-300); border-radius: var(--radius-md); font-family: var(--font-family-body); font-size: var(--font-size-base);">
+                            </div>
+                            <div>
+                                <label for="message" class="sr-only">Message</label>
+                                <textarea id="message" name="message" placeholder="Your Message" required
+                                          style="width: 100%; min-height: 150px; padding: var(--spacing-3); border: 1px solid var(--gray-300); border-radius: var(--radius-md); font-family: var(--font-family-body); font-size: var(--font-size-base); resize: vertical;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                            <div id="form-message" class="form-message hidden"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-contact">
+                    <h3 class="footer-title">Contact Us</h3>
+                    <div class="footer-contact-item">
+                        <span class="footer-icon">📞</span>
+                        <a href="tel:+4402036093344" class="footer-link">Call Free: +44 020 3609 3344</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-icon">✉️</span>
+                        <a href="mailto:info@atlasfreightconnect.co.uk" class="footer-link">info@atlasfreightconnect.co.uk</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-icon">🌐</span>
+                        <a href="https://www.twitter.com/AlgTrading" class="footer-link">Follow us on Twitter</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-icon">📱</span>
+                        <a href="https://www.instagram.com/AlgTradingOfficial" class="footer-link">Follow us on Instagram</a>
+                    </div>
+                </div>
+                <div class="footer-description">
+                    <h3 class="footer-title">About Alg Trading</h3>
+                    <p class="footer-text">
+                        Alg Trading offers a wide selection of high-quality hygiene products, from daily essentials like 
+                        toilet tissue and paper towels to specialized items such as baby diapers and incontinence solutions. 
+                        All our products are FSC-certified and tested by Dermatest (Germany) and Eurofins (France) for 
+                        exceptional quality and safety.
+                    </p>
+                </div>
+            </div>
+            <p class="footer-copyright">© 2025 Alg Trading. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const supabaseUrl = 'https://rbdjierclsiuvprvrzie.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiZGppZXJjbHNpdXZwcnZyemllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjgwNjUsImV4cCI6MjA2NzMwNDA2NX0.E69edaH7d8w_bJq4iQlK7fQGvSaEOxgjdTqBE964O1Y';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('contact-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const messageDiv = document.getElementById('form-message');
+            messageDiv.classList.add('hidden');
+            messageDiv.classList.remove('success', 'error');
+            
+            const formData = {
+                name: form.name.value.trim(),
+                email: form.email.value.trim(),
+                phone_number: form.phone_number.value.trim(),
+                message: form.message.value.trim()
+            };
+
+            // Basic client-side validation
+            if (!formData.name || !formData.email || !formData.phone_number || !formData.message) {
+                messageDiv.textContent = 'Please fill out all fields.';
+                messageDiv.classList.add('error');
+                messageDiv.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('contacts')
+                    .insert([formData]);
+
+                if (error) {
+                    throw error;
+                }
+
+                messageDiv.textContent = 'Thank you for your message! We will get back to you soon.';
+                messageDiv.classList.add('success');
+                messageDiv.classList.remove('hidden');
+                form.reset();
+            } catch (error) {
+                console.error('Error submitting form:', error.message);
+                messageDiv.textContent = error.message || 'There was an error submitting your message. Please try again later.';
+                messageDiv.classList.add('error');
+                messageDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
